@@ -63,9 +63,9 @@ double euclidean_distance_calc(double x1, double y1, double x2, double y2) {
 }
 
 void read_instance(const IloEnv &env, const std::string &file_name, IloInt &nodes_no,
-                   IloInt &vehicles_no, IloInt &horizon, IloNumArray &e, IloNumArray &l,
-                   IloNumArray &m, IloNumArray &s, IloNumArray2 &tt, IloNumArray &Q, IloNumArray &c,
-                   IloInt &p, IloInt &w, IloInt &f, IloInt &T_max) {
+                   IloInt &vehicles_no, IloNumArray &e, IloNumArray &l, IloNumArray &m,
+                   IloNumArray &s, IloNumArray2 &tt, IloNumArray &Q, IloNumArray &c, IloInt &p,
+                   IloInt &w, IloInt &f, IloInt &T_max) {
     ifstream file(file_name, std::ios::in);
     if (!file.is_open()) {
         std::cout << "Error: Could not open file " << file_name << std::endl;
@@ -143,46 +143,33 @@ void read_instance(const IloEnv &env, const std::string &file_name, IloInt &node
         Q[k] = vehicles[k].Q;
         c[k] = vehicles[k].c;
     }
-    int max_date = 0;
-    for (int i = 0; i < nodes_no; i++) {
-        if (d[i] > max_date) {
-            max_date = d[i];
-        }
-    }
-    horizon = max_date;
     return;
 }
 
 int main(int argc, char **argv) {
-    IloInt nodes_no, vehicles_no, horizon, p = 0, w = 10000, f = 1000, T_max;
+    IloInt nodes_no, vehicles_no, p = 0, w = 10000, f = 1000, T_max;
     IloNumArray e, l, m, s, c, Q;
     IloNumArray2 tt;
     IloEnv env;
-    read_instance(env, argv[1], nodes_no, vehicles_no, horizon, e, l, m, s, tt, Q, c, p, w, f,
-                  T_max);
-    std::cout << p << "," << w << "," << f << "," << T_max << std::endl;
-    // for (int i = 0; i < nodes_no; i++)
-    // {
-    //     std::cout << i << " " << e[i] << " " << l[i] << " " << r[i] << " " << d[i] << " " << m[i]
-    //     << " " << s[i] << std::endl;
+    read_instance(env, argv[1], nodes_no, vehicles_no, e, l, m, s, tt, Q, c, p, w, f, T_max);
+    // std::cout << p << "," << w << "," << f << "," << T_max << std::endl;
+    // std::cout << nodes_no << ", " << vehicles_no << std::endl;
+    // for (int i = 0; i < nodes_no; i++) {
+    //     std::cout << i << " " << e[i] << " " << l[i] << " " << m[i] << " " << s[i] << std::endl;
     // }
-    // for (int i = 0; i < vehicles_no; i++)
-    // {
+    // for (int i = 0; i < vehicles_no; i++) {
     //     std::cout << i << " " << Q[i] << " " << c[i] << std::endl;
     // }
-    // for (int i = 0; i < nodes_no; i++)
-    // {
-    //     for (int j = 0; j < nodes_no; j++)
-    //     {
+    // for (int i = 0; i < nodes_no; i++) {
+    //     for (int j = 0; j < nodes_no; j++) {
     //         std::cout << tt[i][j] << " ";
     //     }
     //     std::cout << std::endl;
     // }
-    // ofstream res("CallBackResult.csv", ios::app);
     try {
         IloModel model(env);
         // Variable Define
-        BoolVar3Matrix x(env, horizon + 1);
+        BoolVar3Matrix x(env, vehicles_no);
         for (int k = 0; k < vehicles_no; k++) {
             x[k] = BoolVarMatrix(env, nodes_no);
             for (int i = 0; i < nodes_no; i++) {
@@ -245,6 +232,8 @@ int main(int argc, char **argv) {
                 depotIn += x[k][i][0];
             }
             model.add(depotOut == depotIn);
+            model.add(depotOut <= 1);
+            model.add(depotIn <= 1);
             depotOut.end();
             depotIn.end();
         }
@@ -372,7 +361,7 @@ int main(int argc, char **argv) {
         ofstream detail_res("./detail_res/" + instance_name, std::ios::out);
         // display the value of variable
         for (int k = 0; k < vehicles_no; k++) {
-            detail_res << std::endl << "vehicle " << k << ": ";
+            detail_res << "vehicle " << k << ": ";
             for (int i = 0; i < nodes_no; i++) {
                 if (i == 0) {
                     detail_res << i;
@@ -389,6 +378,7 @@ int main(int argc, char **argv) {
                     }
                 }
             }
+            detail_res << std::endl;
         }
         detail_res << std::endl;
         // for (int i = 1; i < nodes_no; i++)
@@ -437,14 +427,14 @@ int main(int argc, char **argv) {
         }
         detail_res << std::endl;
 
-        detail_res << "arrival time:";
-        for (int i = 0; i < nodes_no; i++) {
+        detail_res << "arrival time: 0 ";
+        for (int i = 1; i < nodes_no; i++) {
             detail_res << cplex.getValue(at[i]) << " ";
         }
         detail_res << endl;
 
-        detail_res << "departure time:";
-        for (int i = 0; i < nodes_no; i++) {
+        detail_res << "departure time: 0 ";
+        for (int i = 1; i < nodes_no; i++) {
             detail_res << cplex.getValue(dt[i]) << " ";
         }
 

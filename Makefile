@@ -9,8 +9,8 @@ LIBFORMAT  = static_pic
 #
 #------------------------------------------------------------
 
-CPLEXDIR      = /Applications/CPLEX_Studio221/cplex
-CONCERTDIR    = /Applications/CPLEX_Studio221/concert
+CPLEXDIR      = /Applications/CPLEX_Studio129/cplex
+CONCERTDIR    = /Applications/CPLEX_Studio129/concert
 
 # ---------------------------------------------------------------------
 # Compiler selection 

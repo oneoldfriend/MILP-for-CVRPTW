@@ -1,0 +1,6 @@
+vehicle 0: 0 -> 1 -> 0
+vehicle 1: 0 -> 2 -> 0
+
+outsourced demands: 
+arrival time: 0 967 967 
+departure time: 0 1057 1057 
