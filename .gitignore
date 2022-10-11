@@ -1,0 +1,7 @@
+.idea
+.vscode
+milp
+*.o
+.DS_Store
+*.lp
+results.txt
